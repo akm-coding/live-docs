@@ -1,15 +1,16 @@
 "use client";
 
 import { ClientSideSuspense, RoomProvider } from "@liveblocks/react/suspense";
-import React, { useEffect, useRef, useState } from "react";
-import Loader from "./Loader";
-import Header from "./Header";
+import { Editor } from "@/components/editor/Editor";
+import Header from "@/components/Header";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { Editor } from "./editor/Editor";
 import ActiveCollaborators from "./ActiveCollaborators";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import Image from "next/image";
+import Loader from "./Loader";
 import { updateDocument } from "@/lib/actions/room.action";
+// import ShareModal from "./ShareModal";
 
 const CollaborativeRoom = ({
   roomId,
@@ -39,8 +40,9 @@ const CollaborativeRoom = ({
           }
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
+
       setLoading(false);
     }
   };
@@ -52,10 +54,12 @@ const CollaborativeRoom = ({
         !containerRef.current.contains(e.target as Node)
       ) {
         setEditing(false);
-        updateDocument(roomId, documentTitle);
+        // updateDocument(roomId, documentTitle);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -74,7 +78,7 @@ const CollaborativeRoom = ({
           <Header>
             <div
               ref={containerRef}
-              className="flex w-fit justify-center items-center gap-2"
+              className="flex w-fit items-center justify-center gap-2"
             >
               {editing && !loading ? (
                 <Input
@@ -82,11 +86,9 @@ const CollaborativeRoom = ({
                   value={documentTitle}
                   ref={inputRef}
                   placeholder="Enter title"
-                  onChange={(e) => {
-                    setDocumentTitle(e.target.value);
-                  }}
+                  onChange={(e) => setDocumentTitle(e.target.value)}
                   onKeyDown={updateTitleHandler}
-                  disabled={!editing}
+                  disable={!editing}
                   className="document-title-input"
                 />
               ) : (
@@ -94,6 +96,7 @@ const CollaborativeRoom = ({
                   <p className="document-title">{documentTitle}</p>
                 </>
               )}
+
               {currentUserType === "editor" && !editing && (
                 <Image
                   src="/assets/icons/edit.svg"
@@ -109,10 +112,18 @@ const CollaborativeRoom = ({
                 <p className="view-only-tag">View only</p>
               )}
 
-              {loading && <p className="text-sm">saving...</p>}
+              {loading && <p className="text-sm text-gray-400">saving...</p>}
             </div>
             <div className="flex w-full flex-1 justify-end gap-2 sm:gap-3">
               <ActiveCollaborators />
+
+              {/* <ShareModal
+                roomId={roomId}
+                collaborators={users}
+                creatorId={roomMetadata.creatorId}
+                currentUserType={currentUserType}
+              /> */}
+
               <SignedOut>
                 <SignInButton />
               </SignedOut>
